@@ -1,6 +1,6 @@
 const Income = require("../models/Income");
 const Expense = require("../models/Expense");
-const { isValidObjectedId, Types, isValidObjectId } =  require("mongoose");
+const { isValidObjectId } =  require("mongoose");
 
 // Dashboard data
 exports.getDashboardData =  async(req, res) => {
@@ -42,13 +42,33 @@ exports.getDashboardData =  async(req, res) => {
         );
         
         //fetch last 5 transactions (income + expenses)
-        const lastTransactuibs = [
+        const lastTransactions = [
          ...((await Income.find({ userId })).toSorted({ date: -1}).limit(5)).map(
-            test
-         )
-        ]
+            (txn) => ({
+                ...txn.toObject(),
+                type: "income",
+            })
+         ),
+          ...((await Expense.find({ userId })).toSorted({ date: -1}).limit(5)).map(
+            (txn) => ({
+                ...txn.toObject(),
+                type: "expense",
+            })
+         ),
+        ].sort((a, b) => b.date - a.date); // sort latest first
             
+        // Final Response
+        res.json({
+            totalBalance: (totalIncome[0]?.total || 0) - (totalExpense[0]?.total || 0),
+            totalIncome: totalIncome[0]?.total || 0,
+            totalExpenses: totalExpense[0]?.total || 0,
+            last30DaysExpenses: { total: expensesLast30Days, transactions: last30DaysExpenseTransactions,},
+            last60DaysIncome: { total: incomeLast60Days, 
+                                transactions: last60DaysIncomeTransactions,
+            },
+            recentTransactions: lastTransactions
+        });
     } catch (error) {
-        
+        res.status(500).json({ message: "Server Error", error});
     }
 }
