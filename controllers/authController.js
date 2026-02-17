@@ -8,7 +8,7 @@ const generateToken = (id) => {
 
 //Register User
 exports.registerUser = async (req,res) => {
-    const { fullName, email, password, profileImageUrl } = req.body
+    const { fullName, email, password, profileimageurl } = req.body
     
     //validation: Checl fopr missing fields
     if(!fullName || !email || !password) {
@@ -26,7 +26,7 @@ exports.registerUser = async (req,res) => {
             fullName,
             email,
             password,
-            profileImageUrl
+            profileimageurl
         })
         
         res.status(201).json({
